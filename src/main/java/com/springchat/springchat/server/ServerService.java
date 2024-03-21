@@ -15,8 +15,13 @@ public class ServerService {
     public Optional<String> getServerId(String serverName){
         return serverRepository
                 .findByServerName(serverName)
-                .map(Server::getServerId);
-    }
+                .map(Server::getServerId)
+                .or(() -> {
+                    var chatId = createServer(serverName);
+                    return Optional.of(chatId);
+                });
+    };
+
 
     private String createServer(String serverName){
         var serverId = serverName + UUID.randomUUID();

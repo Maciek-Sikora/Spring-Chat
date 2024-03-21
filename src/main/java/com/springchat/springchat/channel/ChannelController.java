@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,13 +18,25 @@ import java.util.List;
 public class ChannelController {
 
     @Autowired
-//    private final SimpMessagingTemplate simpMessagingTemplate;
+    private final SimpMessagingTemplate simpMessagingTemplate;
     private final MessageService messageService;
 
     @MessageMapping("/channel")
-    public void acceptMessage(@Payload Message message) throws Exception {
+//    @SendTo("/user/messages")
+    public Message acceptMessage(@Payload Message message) throws Exception {
         Message saved = messageService.save(message);
-        // TODO: Finish this part with simpMessagingTemplate
+        simpMessagingTemplate.convertAndSendToUser(
+                message.getServerName(), "/queue/messages",
+                new Message(
+                        saved.getId(),
+                        saved.getServerName(),
+                        saved.getServerId(),
+                        saved.getSenderId(),
+                        saved.getContent(),
+                        saved.getTime()
+                )
+        );
+        return saved;
     }
 
     @GetMapping("messages/{serverName}")
