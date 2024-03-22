@@ -5,10 +5,7 @@ import com.springchat.springchat.channel.ChannelRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +21,12 @@ public class ServerService {
                     var serverId = createServer(serverName);
                     return serverId;
                 });
+    };
+
+    public Server getServer(String serverId){
+        return serverRepository
+                .findByServerId(serverId)
+                .orElseThrow(() -> new NoSuchElementException("Server not found"));
     };
 
     public List<Server> getServers() {

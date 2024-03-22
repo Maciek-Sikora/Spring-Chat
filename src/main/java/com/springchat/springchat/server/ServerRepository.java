@@ -9,4 +9,5 @@ import java.util.Set;
 
 public interface ServerRepository extends MongoRepository<Server, String> {
     Optional<Server> findByServerName(String serverName);
+    Optional<Server> findByServerId(String serverId);
 }
