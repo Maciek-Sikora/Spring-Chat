@@ -1,9 +1,13 @@
 package com.springchat.springchat.server;
 
+import com.springchat.springchat.channel.Channel;
+import com.springchat.springchat.channel.ChannelRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -12,18 +16,22 @@ public class ServerService {
 
     private final ServerRepository serverRepository;
 
-    public Optional<String> getServerId(String serverName){
+    public String getServerId(String serverName){
         return serverRepository
                 .findByServerName(serverName)
                 .map(Server::getServerId)
-                .or(() -> {
-                    var chatId = createServer(serverName);
-                    return Optional.of(chatId);
+                .orElseGet(() -> {
+                    var serverId = createServer(serverName);
+                    return serverId;
                 });
     };
 
+    public List<Server> getServers() {
+        return serverRepository.findAll();
+    }
 
-    private String createServer(String serverName){
+
+    public String createServer(String serverName){
         var serverId = serverName + UUID.randomUUID();
         Server server = Server
                 .builder()
@@ -34,5 +42,4 @@ public class ServerService {
         serverRepository.save(server);
         return serverId;
     }
-
 }

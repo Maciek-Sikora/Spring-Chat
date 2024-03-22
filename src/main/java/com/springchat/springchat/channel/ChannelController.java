@@ -1,48 +1,29 @@
 package com.springchat.springchat.channel;
 
+import com.springchat.springchat.message.Message;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
+import java.nio.channels.Channels;
 import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
 public class ChannelController {
+    private final ChannelService channelService;
 
-    @Autowired
-    private final SimpMessagingTemplate simpMessagingTemplate;
-    private final MessageService messageService;
-
-    @MessageMapping("/channel")
-//    @SendTo("/user/messages")
-    public Message acceptMessage(@Payload Message message) throws Exception {
-        Message saved = messageService.save(message);
-        simpMessagingTemplate.convertAndSendToUser(
-                message.getServerName(), "/queue/messages",
-                new Message(
-                        saved.getId(),
-                        saved.getServerName(),
-                        saved.getServerId(),
-                        saved.getSenderId(),
-                        saved.getContent(),
-                        saved.getTime()
-                )
-        );
-        return saved;
+    @PostMapping("createChannel/{serverName}/{channelName}")
+    public ResponseEntity<String> createChannel (@PathVariable String serverName, @PathVariable String channelName) {
+        return ResponseEntity.ok(channelService.createChannel(channelName, serverName));
     }
 
-    @GetMapping("messages/{serverName}")
-    public ResponseEntity<List<Message>> getChannelMessages (@PathVariable String serverName) {
-        return ResponseEntity.ok(messageService.findMessages(serverName));
+    @GetMapping("channels/{serverName}")
+    public ResponseEntity<List<Channel>> getChannelMessages (@PathVariable String serverName) {
+        return ResponseEntity.ok(channelService.findChannels(serverName));
     }
-
-
 }

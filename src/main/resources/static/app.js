@@ -34,7 +34,7 @@ function sendMsgTest(serverName) {
     // register the connected user
 
         const chatMessage = {
-            serverName: serverName,
+            channelName: serverName,
             senderId: "UserIDTEST",
             content: "Content test",
             time: new Date()
