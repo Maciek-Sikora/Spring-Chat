@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 import java.util.Optional;
@@ -38,5 +39,9 @@ public class UserController {
         return ResponseEntity.ok(userService.getServersWhereUser(userName));
     }
 
+//    @GetMapping("/chat")
+//    public String chat() {
+//        return "redirect:/chat.html";
+//    }
 
 }
