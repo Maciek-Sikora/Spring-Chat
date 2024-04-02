@@ -89,6 +89,9 @@ button:hover{
 CHAT Section
 */
 
+a {
+
+}
 
 .card .chat-app {
 
@@ -126,7 +129,7 @@ CHAT Section
 }
 
 .form-control {
-    width: 70%;
+    width: 85%;
     padding: 10px;
     background: #e0dede;
     display: inline-block;
@@ -165,6 +168,27 @@ CHAT Section
     -o-transition: .5s;
     -webkit-transition: .5s;
     transition: .5s
+}
+a {
+    text-decoration: none;
+    color: #992525;
+    padding: 10px 15px;
+    list-style: none;
+    border-radius: 3px
+}
+
+a:hover {
+    background: #efefef;
+    cursor: pointer
+}
+
+
+a.active {
+    background: #efefef
+}
+
+a .name {
+    font-size: 15px
 }
 
 .chat-list li {
