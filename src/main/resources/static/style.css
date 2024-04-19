@@ -138,6 +138,17 @@ a {
     border-radius: 5px;
 }
 
+.form-input {
+    width: 75%;
+    padding: 10px;
+    background: #f3f1f1;
+    display: inline-block;
+    border: none;
+    outline: none;
+    border-radius: 5px;
+}
+
+
 .input-group {
     display: flex;
     flex-direction: row;
@@ -150,6 +161,15 @@ a {
     margin-inline-end: 0px;
     padding-inline-start: 40px;
 }
+.input-group-text{
+    margin: 7px;
+}
+.input-group-prepend:hover {
+    background: #efefef;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
 .top-labels {
     text-align: center;
 }
@@ -191,26 +211,26 @@ a .name {
     font-size: 15px
 }
 
-.chat-list li {
+.list-unstyled li {
     padding: 10px 15px;
     list-style: none;
     border-radius: 3px
 }
 
-.chat-list li:hover {
+.list-unstyled li:hover {
     background: #efefef;
     cursor: pointer
 }
 
-.chat-list li.active {
+.list-unstyled li.active {
     background: #efefef
 }
 
-.chat-list li .name {
+.list-unstyled li .name {
     font-size: 15px
 }
 
-.chat-list img {
+.list-unstyled img {
     width: 45px;
     border-radius: 50%
 }
@@ -244,6 +264,11 @@ a .name {
 .chat .chat-header .chat-about {
     float: left;
     padding-left: 10px
+}
+
+.chat .chat-header .leave {
+    float: right;
+    padding-right: 10px
 }
 
 .chat .chat-history {

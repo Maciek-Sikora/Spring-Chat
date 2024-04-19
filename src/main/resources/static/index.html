@@ -31,9 +31,9 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text"><i class="fa fa-search"></i></span>
                         </div>
-                        <input type="text" class="form-control" placeholder="Search...">
+                        <input type="text" class="form-input" placeholder="Search...">
                     </div>
-                    <ul class="list-unstyled chat-list mt-2 mb-0">
+                    <ul class="list-unstyled server-list mt-2 mb-0">
                         <li class="clearfix">
 <!--                            <img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="avatar">-->
                             <div class="about">
@@ -76,7 +76,14 @@
 <!--                                <div class="status"> <i class="fa fa-circle offline"></i> offline since Oct 28 </div>-->
                             </div>
                         </li>
+
                     </ul>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" onclick="addServer()"><i class="fa fa-plus-square" aria-hidden="true"></i></span>
+                        </div>
+                        <input type="text" class="form-input" placeholder="Server Name">
+                    </div>
                 </div>
 
                 <div class="channels">
@@ -88,6 +95,12 @@
                             </div>
                         </li>
                     </ul>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fa fa-plus-square" aria-hidden="true" id></i></span>
+                        </div>
+                        <input type="text" class="form-input" placeholder="Channel Name">
+                    </div>
                 </div>
 
                 <div class="chat">
@@ -100,10 +113,10 @@
                                         <h5>Aiden Chavez</h5>
                                     </div>
 
-                                    <small>Last seen: 2 hours ago</small>
+                                    <small>Last message: 2 hours ago</small>
                                 </div>
                             </div>
-                            <div class="col-lg-6 hidden-sm text-right">
+                            <div class="leave">
                                 <a href="javascript:void(0);" class="btn btn-outline-warning">Leave Server</a>
                             </div>
                         </div>
@@ -113,7 +126,8 @@
                             <li class="clearfix">
                                 <div class="message-data text-right">
                                     <span class="message-data-time">10:10 AM, Today</span>
-                                    <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="avatar">
+                                    <span class="message-data-time">Marcel</span>
+<!--                                    <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="avatar">-->
                                 </div>
                                 <div class="message other-message float-right"> Hi Aiden, how are you? How is the project coming along? </div>
                             </li>
