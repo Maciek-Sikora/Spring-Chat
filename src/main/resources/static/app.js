@@ -22,17 +22,23 @@ function connectToWebSocket(){
 
     stompClient.connect({}, onConnected, onError);
 }
+onConnected()
 function onConnected(){
-    stompClient.subscribe(`/user/messages`, onMessageReceived);
+    // stompClient.subscribe(`/user/messages`, onMessageReceived);
+    loadContent()
+
 }
-async function subscribeChannel(serverName, channelName) {
+async function loadChannel(serverName, channelName) {
+    console.log(serverName, channelName)
     const messages = await fetch(`messages/${serverName}/${channelName}`, {
         method: "GET"
     });
-    const messagesResponse = await channels.json();
+    const messagesResponse = await messages.json();
     console.log(messagesResponse)
+//     TODO end it
 }
-async function subscribeServer(serverName) {
+
+async function loadServer(serverName) {
     data[serverName] = {}
     const channels = await fetch(`channels/${serverName}`, {
         method: "GET"
@@ -40,10 +46,27 @@ async function subscribeServer(serverName) {
     const channelsResponse = await channels.json();
     channelsResponse.forEach(channel => {
         data[serverName][channel.channelName] = {}
-        subscribeChannel(serverName, channel.channelName)
+        loadChannel(serverName, channel.channelName)
     });
 }
 
+async function loadContent() {
+    const servers = await fetch(`servers`, {
+        method: "GET"
+    });
+    const serversResponse = await servers.json();
+    console.log(serversResponse)
+    serversResponse.forEach(server => {loadServer(server.serverName)})
+}
+
+async function subscribeServers() {
+    for (const server in data) {
+        stompClient.subscribe(`/user/${server}/queue/messages`, onMessageReceived)
+    }
+}
+async function onMessageReceived(message){
+    console.log(message)
+}
 async function addServer() {
     serverName = $('*[placeholder="Server Name"]').val().trim()
     if (serverName.length == 0) {
@@ -59,7 +82,9 @@ async function addServer() {
         console.log("NO ok")
         return;
     }
-    var newLi = $("<li>").addClass("clearfix active");
+    var newLi = $("<li>")
+        .addClass("clearfix active")
+        .attr("data-servername", serverName);
     var aboutDiv = $("<div>").addClass("about");
     var nameDiv = $("<div>").addClass("name").text(serverName);
     aboutDiv.append(nameDiv);
@@ -68,9 +93,16 @@ async function addServer() {
 
 }
 
+function select(serverName){
+    $('.server-list > li').removeClass('active');
+    $(serverName).addClass('active');
+}
+
 $(function () {
     $("#join").click(() => joinChat());
 });
 
-
-
+$('.server-list > li').click(function() {
+    const server = $(this).data('servername');
+    console.log('Clicked item:', server);
+});

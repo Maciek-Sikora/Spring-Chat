@@ -24,7 +24,7 @@ public class MessageController {
     public Message acceptMessage(@Payload Message message) throws Exception {
         Message saved = messageService.save(message);
         simpMessagingTemplate.convertAndSendToUser(
-                message.getChannelName(), "/queue/messages",
+                message.getServerName(), "/queue/messages",
                 new Message(
                         saved.getId(),
                         saved.getChannelName(),
