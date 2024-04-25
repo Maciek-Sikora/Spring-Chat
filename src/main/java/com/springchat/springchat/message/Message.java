@@ -21,6 +21,7 @@ public class Message {
     private String channelId;
     private String serverId;
     private String serverName;
+    private String senderName;
     private String senderId;
     private String content;
     private Date time;

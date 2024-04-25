@@ -20,7 +20,7 @@ public class MessageController {
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final MessageService messageService;
 
-    @MessageMapping("/message")
+    @MessageMapping("message")
     public Message acceptMessage(@Payload Message message) throws Exception {
         Message saved = messageService.save(message);
         simpMessagingTemplate.convertAndSendToUser(
@@ -31,6 +31,7 @@ public class MessageController {
                         saved.getChannelId(),
                         saved.getServerId(),
                         saved.getServerName(),
+                        saved.getSenderName(),
                         saved.getSenderId(),
                         saved.getContent(),
                         saved.getTime()
