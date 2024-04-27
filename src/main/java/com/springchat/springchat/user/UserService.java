@@ -71,6 +71,12 @@ public class UserService {
     }
 
     public String joinServer(String serverName, String nickname){
+        String serverId = serverService.getServerId(serverName);
+
+        if (serverId == null) {
+            serverService.createServer(serverName);
+        }
+
         userServerRepository.save(
                 UserServer.builder()
                         .serverId(serverService.getServerId(serverName))

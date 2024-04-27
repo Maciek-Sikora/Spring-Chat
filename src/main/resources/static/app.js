@@ -75,6 +75,7 @@ async function loadServer(serverName) {
 }
 
 function loadServers(){
+    $('.server-list > li').remove();
     for (serverName in data){
         var newServer = $('<li>', {
             class: 'clearfix',
@@ -143,17 +144,30 @@ async function addServer() {
         console.log("NO ok")
         return;
     }
-    var newLi = $("<li>")
-        .addClass("clearfix active")
-        .attr("data-servername", serverName);
-    var aboutDiv = $("<div>").addClass("about");
-    var nameDiv = $("<div>").addClass("name").text(serverName);
-    aboutDiv.append(nameDiv);
-    newLi.append(aboutDiv);
-    $("ul.list-unstyled.server-list").append(newLi)
+    data[serverName] = {}
+    loadServers()
+    selectServer(serverName)
 }
-
+async function addChannel() {
+    channelName = $('*[placeholder="Channel Name"]').val().trim()
+    if (serverName.length == 0) {
+        alert("Server name cannot be empty")
+        return;
+    }
+    serverName = $('ul.server-list').find('li.clearfix.active').first().find('.name').text()
+    const addChannel = await fetch(`createChannel/${serverName}/${channelName}`, {
+        method: "POST"
+    });
+    const addServerResponse = await addChannel;
+    if (!addServerResponse.ok) {
+        console.log("NO ok")
+        return;
+    }
+    data[serverName][channelName] = []
+    showChannels(serverName)
+}
 function showChannels(serverName){
+    $('.chat-list > li').remove();
     const channels = data[serverName];
     for (const channel in channels) {
         var newChannel = $('<li>', {
@@ -171,14 +185,19 @@ function showMessgaes(serverName, channelName){
         console.log(message)
     }
 }
-function select(serverName){
+function selectServer(serverName){
     $('.server-list > li').removeClass('active');
     $('.server-list [data-servername='+ serverName+']').addClass('active');
-    $('.chat-list > li').remove();
     showChannels(serverName)
     $(document).ready(function() {
         $('.chat-list > li:first').addClass('clearfix active');
     });
+
+}
+function selectChannel(channelName){
+    $('.chat-list > li').removeClass('active');
+    $('.chat-list [data-channelname='+ channelName+']').addClass('active');
+    // showMessgaes()
 
 }
 
@@ -209,5 +228,10 @@ $(function () {
 
 $('.server-list').on('click', 'li', function() {
     const server = $(this).data('servername');
-    select(server); // Call select function with the clicked server name
+    selectServer(server); // Call select function with the clicked server name
+});
+
+$('.chat-list').on('click', 'li', function() {
+    const channel = $(this).data('channelname');
+    selectChannel(channel);
 });
