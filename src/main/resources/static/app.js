@@ -138,8 +138,8 @@ async function addServer() {
     const joinServer = await fetch(`joinServer/${nickname}/${serverName}`, {
         method: "POST"
     });
-    const data = await joinServer;
-    if (!data.ok) {
+    const joinServerResponse = await joinServer;
+    if (!joinServerResponse.ok) {
         console.log("NO ok")
         return;
     }
@@ -151,7 +151,6 @@ async function addServer() {
     aboutDiv.append(nameDiv);
     newLi.append(aboutDiv);
     $("ul.list-unstyled.server-list").append(newLi)
-
 }
 
 function showChannels(serverName){
