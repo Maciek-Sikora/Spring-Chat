@@ -1,7 +1,12 @@
 let nickname = "user";
 let stompClient = null;
 let data = {}
-
+function getServerName(){
+    return $('ul.server-list').find('li.clearfix.active').first().find('.name').text()
+}
+function getChannelName(){
+    return $('ul.chat-list').find('li.clearfix.active').first().find('.name').text()
+}
 async function joinChat() {
     nickname = $("#nickname").val().trim();
     const userResponse = await fetch(`createUser/${nickname}`, {
@@ -49,16 +54,26 @@ function addMessgae(message){
     $('ul.m-b-0').append(newMessage);
 }
 async function loadChannel(serverName, channelName) {
-    console.log(serverName, channelName)
+    $('.messages > li').remove();
     const messages = await fetch(`messages/${serverName}/${channelName}`, {
         method: "GET"
     });
     const messagesResponse = await messages.json();
     console.log(messagesResponse)
     data[serverName][channelName] = messagesResponse
-    messagesResponse.forEach(function(message) {
-        addMessgae(message);
-    })
+    $('.chat-history').find('img.center').remove();
+    $('.chat-history').find('h4').remove();
+    if (messagesResponse.length == 0){
+        $('<img>').attr('src', 'https://cdn-icons-png.flaticon.com/512/5089/5089742.png').addClass('center').appendTo('.chat-history');
+        $('.chat-history').append($('<h4>', {
+            class: 'center',
+            text: 'There are no messages yet!'
+        }));
+    } else {
+        messagesResponse.forEach(function (message) {
+            addMessgae(message);
+        })
+    }
 
 }
 
@@ -128,7 +143,13 @@ function formatTimestamp(timestamp) {
 
 async function onMessageReceived(payload){
     const message = JSON.parse(payload.body)
-    addMessgae(message)
+    if (message.channelName == getChannelName()){
+        addMessgae(message)
+        $(document).ready(function() {
+            $(".chat-history").scrollTop($(".chat-history")[0].scrollHeight);
+        })
+    }
+    data[getServerName()][getChannelName()].push(message)
 }
 async function addServer() {
     serverName = $('*[placeholder="Server Name"]').val().trim()
@@ -178,37 +199,72 @@ function showChannels(serverName){
         $('.chat-list').append(newChannel);
     }
 }
-
-function showMessgaes(serverName, channelName){
-    const messages = data[serverName][channelName]
-    for (const message in messages) {
-        console.log(message)
-    }
-}
 function selectServer(serverName){
     $('.server-list > li').removeClass('active');
     $('.server-list [data-servername='+ serverName+']').addClass('active');
     showChannels(serverName)
-    $(document).ready(function() {
-        $('.chat-list > li:first').addClass('clearfix active');
-    });
+    selectChannel(Object.keys(data[serverName])[0])
+
+}
+
+function formatLastMessageDate(dateString) {
+    const messageDate = new Date(dateString);
+
+    const currentDate = new Date();
+
+    const timeDifference = currentDate - messageDate;
+
+    const secondsDifference = Math.floor(timeDifference / 1000);
+    const minutesDifference = Math.floor(timeDifference / (1000 * 60));
+    const hoursDifference = Math.floor(timeDifference / (1000 * 60 * 60));
+    const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+    const monthsDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24 * 30.4368));
+    const yearsDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24 * 365.25));
+
+    if (secondsDifference < 60) {
+        return secondsDifference + " second" + (secondsDifference === 1 ? "" : "s") + " ago";
+    } else if (minutesDifference < 60) {
+        return minutesDifference + " minute" + (minutesDifference === 1 ? "" : "s") + " ago";
+    } else if (hoursDifference < 24) {
+        return hoursDifference + " hour" + (hoursDifference === 1 ? "" : "s") + " ago";
+    } else if (daysDifference < 30) {
+        return daysDifference + " day" + (daysDifference === 1 ? "" : "s") + " ago";
+    } else if (monthsDifference < 12) {
+        return monthsDifference + " month" + (monthsDifference === 1 ? "" : "s") + " ago";
+    } else {
+        return yearsDifference + " year" + (yearsDifference === 1 ? "" : "s") + " ago";
+    }
+}
+
+
+function updadeHeader(){
+    $('.server').html(getServerName())
+    $('.channel').html(getChannelName())
+    lastMessageDate = data[getServerName()][getChannelName()].slice(-1).time
+    $('.last').val("Last message: " + formatLastMessageDate(lastMessageDate))
 
 }
 function selectChannel(channelName){
     $('.chat-list > li').removeClass('active');
     $('.chat-list [data-channelname='+ channelName+']').addClass('active');
-    // showMessgaes()
-
+    loadChannel(getServerName(), channelName)
+    updadeHeader()
+    $(document).ready(function() {
+        $(".chat-history").scrollTop($(".chat-history")[0].scrollHeight);
+    })
+    console.log("CYK")
+    $(".chat-history").scrollTop($(".chat-history")[0].scrollHeight);
 }
 
 function sendMessage(){
     var text = $('.form-control').val();
+    $('.form-control').val('')
     if(!text){
         alert("Empty message!")
         return;
     }
-    channelName = $('ul.chat-list').find('li.clearfix.active').first().find('.name').text()
-    serverName = $('ul.server-list').find('li.clearfix.active').first().find('.name').text()
+    channelName = getChannelName()
+    serverName = getServerName()
 
     const messagePayload = {
         channelName: channelName,
@@ -218,20 +274,27 @@ function sendMessage(){
         time: new Date()
     };
     stompClient.send(`/app/message`, {}, JSON.stringify(messagePayload));
-
-
 }
 
-$(function () {
-    $("#join").click(() => joinChat());
+$(document).ready(function() {
+    $(".form-control").on("keyup", function(e) {
+        if (e.keyCode == 13) {
+            sendMessage();
+        }
+    });
+    $(function () {
+        $("#join").click(() => joinChat());
+    });
+
+    $('.server-list').on('click', 'li', function() {
+        const server = $(this).data('servername')
+        selectServer(server)
+    });
+
+    $('.chat-list').on('click', 'li', function() {
+        const channel = $(this).data('channelname')
+        selectChannel(channel)
+    });
+
 });
 
-$('.server-list').on('click', 'li', function() {
-    const server = $(this).data('servername');
-    selectServer(server); // Call select function with the clicked server name
-});
-
-$('.chat-list').on('click', 'li', function() {
-    const channel = $(this).data('channelname');
-    selectChannel(channel);
-});

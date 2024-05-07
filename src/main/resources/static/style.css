@@ -93,13 +93,20 @@ a {
 
 }
 
+.center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+    text-align: center;
+}
 .card.chat-app {
 
     height: 80%;
-    left: 10%;
+    left: 15%;
     top: 10%;
     position: absolute;
-    width: 80%;
+    width: 75%;
 }
 .card {
     display: flex;
@@ -115,7 +122,6 @@ a {
 }
 .chat-app .people-list {
     flex: 1;
-    overflow-y: auto;
     padding: 20px;
     z-index: 7;
     border-right: 2px solid rgb(244, 247, 246);
@@ -189,6 +195,10 @@ a {
     -o-transition: .5s;
     -webkit-transition: .5s;
     transition: .5s
+}
+.server-list{
+    overflow-y: auto;
+    max-height: 70%;
 }
 a {
     text-decoration: none;
