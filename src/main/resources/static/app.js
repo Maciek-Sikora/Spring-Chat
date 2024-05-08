@@ -19,7 +19,6 @@ async function joinChat() {
         connectToWebSocket()
     }
 }
-connectToWebSocket()
 
 function connectToWebSocket(){
     const socket = new SockJS('/ws');
@@ -63,12 +62,14 @@ async function loadChannel(serverName, channelName) {
     data[serverName][channelName] = messagesResponse
     $('.chat-history').find('img.center').remove();
     $('.chat-history').find('h4').remove();
+    $('.channels').find('p.center').remove()
     if (messagesResponse.length == 0){
         $('<img>').attr('src', 'https://cdn-icons-png.flaticon.com/512/5089/5089742.png').addClass('center').appendTo('.chat-history');
         $('.chat-history').append($('<h4>', {
             class: 'center',
             text: 'There are no messages yet!'
         }));
+        $('.channels').append('<p class="center">There is no channel here!</p>');
     } else {
         messagesResponse.forEach(function (message) {
             addMessgae(message);
@@ -78,6 +79,7 @@ async function loadChannel(serverName, channelName) {
 }
 
 async function loadServer(serverName) {
+    console.log(serverName + "FDF")
     data[serverName] = {}
     const channels = await fetch(`channels/${serverName}`, {
         method: "GET"
@@ -103,13 +105,23 @@ function loadServers(){
 }
 
 async function loadContent() {
-    const servers = await fetch(`servers`, {
+const servers = await fetch(`getServersWithUser/${nickname}`, {
         method: "GET"
     });
     const serversResponse = await servers.json();
-    serversResponse.forEach(server => {loadServer(server.serverName)})
-    loadServers()
-    subscribeServers()
+    console.log(serversResponse)
+    if (serversResponse.length == 0){
+        console.log("JEDNO !!")
+    } else {
+        console.log("ODJAZDF")
+        serversResponse.forEach(server => {loadServer(server.serverName)})
+        loadServers()
+        // showChannels(data[1])
+        subscribeServers()
+
+    }
+
+
 }
 
 async function subscribeServers() {

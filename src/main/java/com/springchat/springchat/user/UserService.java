@@ -18,13 +18,9 @@ public class UserService {
     private final UserServerRepository userServerRepository;
     private final UserRepository userRepository;
     private final ServerService serverService;
-    public String getUserId(String nickname){
-        return userRepository
-                .findByNickname(nickname)
-                .orElseThrow(() -> new NoSuchElementException("User not found for nickname: " + nickname))
-                .getUserId();
-    };
-
+    public Optional<String> getUserId(String nickname) {
+        return userRepository.findByNickname(nickname).map(User::getUserId);
+    }
     public Optional<User> getUser(String nickname){
         return userRepository
                 .findByNickname(nickname);
@@ -59,7 +55,12 @@ public class UserService {
     }
 
     public String createUser(String nickname){
-        var userId = nickname + UUID.randomUUID();
+        String userId = getUserId(nickname);
+
+        if (userId != null) {
+            return "User already exist";
+        }
+        userId = nickname + UUID.randomUUID();
         User user = User
                 .builder()
                 .userId(userId)
