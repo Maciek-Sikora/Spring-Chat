@@ -35,7 +35,7 @@ label{
     cursor: pointer;
     transition: .5s ease-in-out;
 }
-#nickname{
+.startInput{
     width: 60%;
     height: 20px;
     background: #e0dede;
@@ -47,7 +47,7 @@ label{
     outline: none;
     border-radius: 5px;
 }
-#join{
+.join{
     width: 60%;
     height: 40px;
     margin: 10px auto;
@@ -89,8 +89,8 @@ button:hover{
 CHAT Section
 */
 
-a {
-
+h5 {
+    margin-bottom: 6px;
 }
 
 .center {
@@ -99,6 +99,14 @@ a {
     margin-right: auto;
     width: 50%;
     text-align: center;
+}
+.card.first-server {
+    display: inline-block;
+    height: 35%;
+    left: 25%;
+    top: 10%;
+    position: absolute;
+    width: 50%;
 }
 .card.chat-app {
 
@@ -374,7 +382,8 @@ a .name {
 }
 
 .chat .chat-message {
-    padding: 20px
+    padding: 20px;
+    margin-top: auto;
 }
 
 .online,

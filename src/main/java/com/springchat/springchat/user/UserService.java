@@ -18,8 +18,8 @@ public class UserService {
     private final UserServerRepository userServerRepository;
     private final UserRepository userRepository;
     private final ServerService serverService;
-    public Optional<String> getUserId(String nickname) {
-        return userRepository.findByNickname(nickname).map(User::getUserId);
+    public String getUserId(String nickname) {
+        return userRepository.findByNickname(nickname).map(User::getUserId).orElse(null);
     }
     public Optional<User> getUser(String nickname){
         return userRepository

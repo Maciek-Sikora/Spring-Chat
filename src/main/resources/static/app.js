@@ -28,7 +28,6 @@ function connectToWebSocket(){
 }
 
 function onConnected(){
-    // stompClient.subscribe(`/user/messages`, onMessageReceived);
     loadContent()
 
 }
@@ -51,6 +50,7 @@ function addMessgae(message){
         });
     }
     $('ul.m-b-0').append(newMessage);
+    updateHeader()
 }
 async function loadChannel(serverName, channelName) {
     $('.messages > li').remove();
@@ -58,18 +58,17 @@ async function loadChannel(serverName, channelName) {
         method: "GET"
     });
     const messagesResponse = await messages.json();
-    console.log(messagesResponse)
     data[serverName][channelName] = messagesResponse
     $('.chat-history').find('img.center').remove();
     $('.chat-history').find('h4').remove();
-    $('.channels').find('p.center').remove()
+
     if (messagesResponse.length == 0){
         $('<img>').attr('src', 'https://cdn-icons-png.flaticon.com/512/5089/5089742.png').addClass('center').appendTo('.chat-history');
         $('.chat-history').append($('<h4>', {
             class: 'center',
             text: 'There are no messages yet!'
         }));
-        $('.channels').append('<p class="center">There is no channel here!</p>');
+
     } else {
         messagesResponse.forEach(function (message) {
             addMessgae(message);
@@ -79,7 +78,6 @@ async function loadChannel(serverName, channelName) {
 }
 
 async function loadServer(serverName) {
-    console.log(serverName + "FDF")
     data[serverName] = {}
     const channels = await fetch(`channels/${serverName}`, {
         method: "GET"
@@ -103,17 +101,23 @@ function loadServers(){
     }
 
 }
+function firstServerJoined(){
+    $(".first-server").addClass("hidden")
+    $(".chat").removeClass("hidden")
+    addServer($('#serverName').val())
+    loadServer($('#serverName').val())
+}
 
 async function loadContent() {
 const servers = await fetch(`getServersWithUser/${nickname}`, {
         method: "GET"
     });
     const serversResponse = await servers.json();
-    console.log(serversResponse)
     if (serversResponse.length == 0){
-        console.log("JEDNO !!")
+        $(".chat").addClass("hidden")
+        $(".first-server").removeClass("hidden")
     } else {
-        console.log("ODJAZDF")
+        console.log("DWA")
         serversResponse.forEach(server => {loadServer(server.serverName)})
         loadServers()
         // showChannels(data[1])
@@ -155,16 +159,20 @@ function formatTimestamp(timestamp) {
 
 async function onMessageReceived(payload){
     const message = JSON.parse(payload.body)
+    console.log(message, "TU")
+    data[getServerName()][getChannelName()].push(message)
     if (message.channelName == getChannelName()){
+        $('.chat-history').find('img.center').remove();
+        $('.chat-history').find('h4').remove();
         addMessgae(message)
         $(document).ready(function() {
             $(".chat-history").scrollTop($(".chat-history")[0].scrollHeight);
         })
     }
-    data[getServerName()][getChannelName()].push(message)
+
 }
-async function addServer() {
-    serverName = $('*[placeholder="Server Name"]').val().trim()
+async function addServerFromInput() {
+    serverName = $('#severNameInput').val().trim()
     if (serverName.length == 0) {
         alert("Server name cannot be empty")
         return;
@@ -178,16 +186,38 @@ async function addServer() {
         return;
     }
     data[serverName] = {}
+    subscribeServers()
     loadServers()
     selectServer(serverName)
 }
+
+async function addServer(serverName) {
+    if (serverName.length == 0) {
+        alert("Server name cannot be empty")
+        return;
+    }
+    const joinServer = await fetch(`joinServer/${nickname}/${serverName}`, {
+        method: "POST"
+    });
+    const joinServerResponse = await joinServer;
+    if (!joinServerResponse.ok) {
+        console.log("NO ok")
+        return;
+    }
+    data[serverName] = {}
+    stompClient.subscribe(`/user/${serverName}/queue/messages`, onMessageReceived)
+    loadServers()
+    selectServer(serverName)
+
+}
+
 async function addChannel() {
     channelName = $('*[placeholder="Channel Name"]').val().trim()
     if (serverName.length == 0) {
         alert("Server name cannot be empty")
         return;
     }
-    serverName = $('ul.server-list').find('li.clearfix.active').first().find('.name').text()
+    serverName = getServerName()
     const addChannel = await fetch(`createChannel/${serverName}/${channelName}`, {
         method: "POST"
     });
@@ -198,24 +228,39 @@ async function addChannel() {
     }
     data[serverName][channelName] = []
     showChannels(serverName)
+    selectChannel(channelName)
 }
 function showChannels(serverName){
     $('.chat-list > li').remove();
+    $('.channels').find('p.center').remove()
     const channels = data[serverName];
-    for (const channel in channels) {
-        var newChannel = $('<li>', {
-            class: 'clearfix',
-            'data-channelname': channel,
-            html: '<div class="about"><div class="name">' + channel + '</div></div>'
-        });
-        $('.chat-list').append(newChannel);
+    console.log(channels)
+    if (Object.keys(channels).length === 0 || ('undefined' in channels && Object.keys(channels).length === 1)) {
+        $('.channels').find('h1.top-labels').after('<p class="center">There is no channel here!</p>');
+    } else {
+
+        for (const channel in channels) {
+            console.log(channel)
+            if (channel == "undefined"){
+                continue
+            }
+            var newChannel = $('<li>', {
+                class: 'clearfix',
+                'data-channelname': channel,
+                html: '<div class="about"><div class="name">' + channel + '</div></div>'
+            });
+            $('.chat-list').append(newChannel);
+        }
     }
 }
 function selectServer(serverName){
     $('.server-list > li').removeClass('active');
     $('.server-list [data-servername='+ serverName+']').addClass('active');
     showChannels(serverName)
-    selectChannel(Object.keys(data[serverName])[0])
+    if (Object.keys(data[serverName]).length != 0){
+        selectChannel(Object.keys(data[serverName])[0])
+    }
+    updateHeader()
 
 }
 
@@ -249,28 +294,32 @@ function formatLastMessageDate(dateString) {
 }
 
 
-function updadeHeader(){
+function updateHeader(){
     $('.server').html(getServerName())
     $('.channel').html(getChannelName())
-    lastMessageDate = data[getServerName()][getChannelName()].slice(-1).time
-    $('.last').val("Last message: " + formatLastMessageDate(lastMessageDate))
+    if (getChannelName().length != 0 && data[getServerName()][getChannelName()].length !== 0) {
+        lastMessageDate = data[getServerName()][getChannelName()].slice(-1)[0].time
+        $('.last').html("Last message: " + formatLastMessageDate(lastMessageDate))
+    } else {
+        $('.last').html("There are no messages here!")
+    }
+
 
 }
 function selectChannel(channelName){
     $('.chat-list > li').removeClass('active');
     $('.chat-list [data-channelname='+ channelName+']').addClass('active');
     loadChannel(getServerName(), channelName)
-    updadeHeader()
+    updateHeader()
     $(document).ready(function() {
         $(".chat-history").scrollTop($(".chat-history")[0].scrollHeight);
     })
-    console.log("CYK")
     $(".chat-history").scrollTop($(".chat-history")[0].scrollHeight);
 }
 
 function sendMessage(){
-    var text = $('.form-control').val();
-    $('.form-control').val('')
+    var text = $('#messageInput').val();
+    $('#messageInput').val('')
     if(!text){
         alert("Empty message!")
         return;
@@ -293,9 +342,6 @@ $(document).ready(function() {
         if (e.keyCode == 13) {
             sendMessage();
         }
-    });
-    $(function () {
-        $("#join").click(() => joinChat());
     });
 
     $('.server-list').on('click', 'li', function() {
