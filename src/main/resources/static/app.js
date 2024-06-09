@@ -105,7 +105,15 @@ function firstServerJoined(){
     $(".first-server").addClass("hidden")
     $(".chat").removeClass("hidden")
     addServer($('#serverName').val())
+    console.log('cu4')
     loadServer($('#serverName').val())
+    console.log('cu1')
+    showChannels(getServerName())
+    console.log('cu2')
+    if (Object.keys(data[getServerName()]).length > 0) {
+        console.log('cu3')
+        selectChannel(Object.keys(data[getServerName()])[0])
+    }
 }
 
 async function loadContent() {
@@ -233,7 +241,8 @@ async function addChannel() {
 function showChannels(serverName){
     $('.chat-list > li').remove();
     $('.channels').find('p.center').remove()
-    const channels = data[serverName];
+    channels = data[serverName];
+    console.log("ten chan 1", serverName)
     console.log(channels)
     if (Object.keys(channels).length === 0 || ('undefined' in channels && Object.keys(channels).length === 1)) {
         $('.channels').find('h1.top-labels').after('<p class="center">There is no channel here!</p>');
